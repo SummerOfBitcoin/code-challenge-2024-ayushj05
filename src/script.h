@@ -43,9 +43,6 @@ bool p2pkh_verify(std::vector<std::string> scriptPubKeyOps, std::vector<std::str
     rpmd160((char*) sha, (char*) rpmd);
 
     if ((char*)rpmd == pkh) {
-        // Remove scriptsig and scriptsig_asm from txn
-        cout << "Entered" << endl;
-
         // Clear scriptsig and scriptsig_asm from transaction
         // int idx = txn_str.find("\"scriptsig\"");
         // txn_str = txn_str.substr(0, idx + 14) + txn_str.substr(idx + 228);

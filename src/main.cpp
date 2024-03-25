@@ -10,28 +10,28 @@ using namespace std;
 int main() {
     // vector<Json::Value> transactions;       // Vector to store all transactions
 
-    // Iterate through all files in the mempool directory and read the transactions
-    for (auto &entry : filesystem::directory_iterator("mempool")) {
-        ifstream txn_file(entry.path(), ifstream::binary);
+    // // Iterate through all files in the mempool directory and read the transactions
+    // for (auto &entry : filesystem::directory_iterator("mempool")) {
+    //     ifstream txn_file(entry.path(), ifstream::binary);
 
-        std::ostringstream tmp;
-        tmp << txn_file.rdbuf();
-        std::string txn_str = tmp.str();
+    //     std::ostringstream tmp;
+    //     tmp << txn_file.rdbuf();
+    //     std::string txn_str = tmp.str();
 
-        Json::Value txn;
-        Json::Reader reader;
-        reader.parse(txn_str.c_str(), txn);
+    //     Json::Value txn;
+    //     Json::Reader reader;
+    //     reader.parse(txn_str.c_str(), txn);
 
-        bool check = true;
-        for (auto &inp : txn["vin"]) {
-            if (inp["prevout"]["scriptpubkey_type"] != "p2pkh"){
-                check = false;
-                break;
-            }
-        }
-        if (check) cout << verify_txn(txn, txn_str) << '\n' << endl;
-        // transactions.push_back(txn);
-    }
+    //     bool check = true;
+    //     for (auto &inp : txn["vin"]) {
+    //         if (inp["prevout"]["scriptpubkey_type"] != "p2pkh"){
+    //             check = false;
+    //             break;
+    //         }
+    //     }
+    //     if (check) cout << verify_txn(txn, txn_str) << '\n' << endl;
+    //     // transactions.push_back(txn);
+    // }
 
     // set<string> s;
     // for (auto &txn : transactions) {
@@ -55,17 +55,17 @@ int main() {
 
 
 
-    // ifstream txn_file("mempool/ff907975dc0cfa299e908e5fba6df56c764866d9a9c22828824c28b8e4511320.json");
+    ifstream txn_file("mempool/ff907975dc0cfa299e908e5fba6df56c764866d9a9c22828824c28b8e4511320.json");
 
-    // std::ostringstream tmp;
-    // tmp << txn_file.rdbuf();
-    // std::string txn_str = tmp.str();
+    std::ostringstream tmp;
+    tmp << txn_file.rdbuf();
+    std::string txn_str = tmp.str();
 
-    // Json::Value txn;
-    // Json::Reader reader;
-    // reader.parse(txn_str.c_str(), txn);
+    Json::Value txn;
+    Json::Reader reader;
+    reader.parse(txn_str.c_str(), txn);
 
-    // cout << verify_txn(txn, txn_str) << endl;
+    cout << verify_txn(txn, txn_str) << endl;
 
 
 

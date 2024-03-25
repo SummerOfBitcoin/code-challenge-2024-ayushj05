@@ -6,7 +6,7 @@
 #include <openssl/ripemd.h>
 #include <openssl/sha.h>
 
-int hex2int(char ch)
+uint8_t hex2int(char ch)
 {
     if (ch >= '0' && ch <= '9')
         return ch - '0';

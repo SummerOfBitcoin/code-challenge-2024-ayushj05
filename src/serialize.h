@@ -7,6 +7,8 @@
 #include <jsoncpp/json/json.h>
 using namespace std;
 
+extern uint8_t hex2int(char ch);
+
 #define IS_UINT32_T 0
 #define IS_INT64_T 1
 
@@ -28,6 +30,13 @@ string bstr2hexstr(string byte_string){
         hex_string.push_back(byte2hex(((unsigned char) byte_string[i])%16));
     }
     return hex_string;
+}
+
+string hexstr2bstr (string hex_string) {
+    string byte_string = "";
+    for (int i = 0; i < hex_string.length(); i+=2)
+        byte_string.push_back((hex2int(hex_string[i]) << 4) + hex2int(hex_string[i+1]));
+    return byte_string;
 }
 
 // Convert integer to hex string (binary format)
@@ -95,26 +104,24 @@ string sertialize_txn (Json::Value txn, bool isCleared = false) {
     
     for (auto &inp : txn["vin"]) {
         // outpoint
-        ser_txn += inp["txid"].asString();
+        ser_txn += hexstr2bstr(inp["txid"].asString());
         ser_txn += int2hex(inp["vout"].asUInt());
 
         if (isCleared)
             ser_txn += int2compact(0);
         else {
-            ser_txn += int2compact(inp["scriptSig"].asString().size());
-            ser_txn += inp["scriptSig"].asString();
+            ser_txn += int2compact(inp["scriptsig"].asString().length()/2);
+            ser_txn += hexstr2bstr(inp["scriptsig"].asString());
         }
-        // ser_txn += int2hex(inp["sequence"].asUInt());       // DOUBTFUL
-        for (int i = 0; i < 4; i++)
-            ser_txn.push_back(255);
+        ser_txn += int2hex(inp["sequence"].asUInt());
     }
 
     ser_txn += int2compact(txn["vout"].size());
 
     for (auto &out : txn["vout"]) {
         ser_txn += int2hex(out["value"].asInt64(), IS_INT64_T);
-        ser_txn += int2compact(out["scriptPubKey"].asString().size());
-        ser_txn += out["scriptPubKey"].asString();
+        ser_txn += int2compact(out["scriptpubkey"].asString().length()/2);
+        ser_txn += hexstr2bstr(out["scriptpubkey"].asString());
     }
 
     ser_txn += int2hex(txn["locktime"].asUInt());
