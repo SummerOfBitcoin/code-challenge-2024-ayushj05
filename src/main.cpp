@@ -3,27 +3,35 @@
 #include <fstream>
 #include <filesystem>
 #include <set>
+#include <sstream>
 #include "script.h"
 using namespace std;
 
 int main() {
     // vector<Json::Value> transactions;       // Vector to store all transactions
 
-    // // Iterate through all files in the mempool directory and read the transactions
-    // for (auto &entry : filesystem::directory_iterator("mempool")) {
-    //     ifstream txn_file(entry.path(), ifstream::binary);
-    //     Json::Value txn;
-    //     txn_file >> txn;
-    //     bool check = true;
-    //     for (auto &inp : txn["vin"]) {
-    //         if (inp["prevout"]["scriptpubkey_type"] != "p2pkh"){
-    //             check = false;
-    //             break;
-    //         }
-    //     }
-    //     if (check) cout << verify_txn(txn) << '\n' << endl;
-    //     // transactions.push_back(txn);
-    // }
+    // Iterate through all files in the mempool directory and read the transactions
+    for (auto &entry : filesystem::directory_iterator("mempool")) {
+        ifstream txn_file(entry.path(), ifstream::binary);
+
+        std::ostringstream tmp;
+        tmp << txn_file.rdbuf();
+        std::string txn_str = tmp.str();
+
+        Json::Value txn;
+        Json::Reader reader;
+        reader.parse(txn_str.c_str(), txn);
+
+        bool check = true;
+        for (auto &inp : txn["vin"]) {
+            if (inp["prevout"]["scriptpubkey_type"] != "p2pkh"){
+                check = false;
+                break;
+            }
+        }
+        if (check) cout << verify_txn(txn, txn_str) << '\n' << endl;
+        // transactions.push_back(txn);
+    }
 
     // set<string> s;
     // for (auto &txn : transactions) {
@@ -42,16 +50,26 @@ int main() {
     //     cout << i << endl;
     // }
 
-    ifstream txn_file("mempool/ff907975dc0cfa299e908e5fba6df56c764866d9a9c22828824c28b8e4511320.json", ifstream::binary);
-    Json::Value txn;
-    txn_file >> txn;
-    cout << verify_txn(txn) << endl;
+    // // Test for int2hex function defined in serialize.h
+    // cout << int2hex(uint32_t(UINT32_MAX - 255 + 97)) << endl;   // Should print a in the beginning
 
-    // char sha[65];
-    // sha256(txn.toStyledString().c_str(), sha);
-    // cout << sha << endl;
 
-    
+
+    // ifstream txn_file("mempool/ff907975dc0cfa299e908e5fba6df56c764866d9a9c22828824c28b8e4511320.json");
+
+    // std::ostringstream tmp;
+    // tmp << txn_file.rdbuf();
+    // std::string txn_str = tmp.str();
+
+    // Json::Value txn;
+    // Json::Reader reader;
+    // reader.parse(txn_str.c_str(), txn);
+
+    // cout << verify_txn(txn, txn_str) << endl;
+
+
+
+
 
     return 0;
 }
