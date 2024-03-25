@@ -1,1 +1,2 @@
-# Update this file to run your own code
+g++ src/main.cpp -o bin/main -std=c++17 -ljsoncpp -lssl -lcrypto
+bin/main
