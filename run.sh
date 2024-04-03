@@ -1,2 +1,7 @@
 g++ src/main.cpp -o bin/main -std=c++17 -ljsoncpp -lssl -lcrypto
-bin/main
+
+if [ $? == 0 ]; then
+    bin/main
+else
+    echo "Compilation failed"
+fi
