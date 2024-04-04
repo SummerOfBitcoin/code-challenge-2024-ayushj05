@@ -12,10 +12,8 @@ extern string target;
 
 string getMerkleRoot(vector<string> &txns_included) {
     queue<string> hashQ;
-    for (auto &txn : txns_included) {
-        reverse(txn.begin(), txn.end());
+    for (auto &txn : txns_included)
         hashQ.push(txn);
-    }
 
     uint32_t prev_size = hashQ.size();
 
@@ -41,7 +39,10 @@ string getMerkleRoot(vector<string> &txns_included) {
         hashQ.push(combined);
     }
 
-    return hashQ.front();
+    string merkle_root = hashQ.front();
+    reverse(merkle_root.begin(), merkle_root.end());
+
+    return merkle_root;
 }
 
 string genCoinbaseTxn (int64_t reward) {
