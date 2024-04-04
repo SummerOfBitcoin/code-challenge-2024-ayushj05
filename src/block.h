@@ -92,7 +92,7 @@ string calcNonce (string blockHeader) {
         SHA256((unsigned char*) tmp.c_str(), tmp.length(), (unsigned char*) sha);
         SHA256((unsigned char*) sha, SHA256_DIGEST_LENGTH, (unsigned char*) sha);
         string hash = "";
-        for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+        for (int i = SHA256_DIGEST_LENGTH - 1; i >= 0; i--)
             hash.push_back(sha[i]);
 
         if (hash < target) {
