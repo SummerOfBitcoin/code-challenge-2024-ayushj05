@@ -5,40 +5,117 @@
 #include <set>
 #include <sstream>
 #include "script.h"
+#include "block.h"
 using namespace std;
 
 set<string> inputs_used;
+string target = string(2, 0) + string(2, 255) + string(28, 0);
 
 void mine() {
-    vector<Json::Value> transactions;       // Vector to store all transactions
+    vector<pair<uint64_t, Json::Value>> transactions;       // Vector to store all transactions
 
     for (auto &entry : filesystem::directory_iterator("mempool")) {
         ifstream txn_file(entry.path(), ifstream::binary);
         Json::Value txn;
         txn_file >> txn;
-        transactions.push_back(txn);
+
+        uint64_t sum_input = 0, sum_output = 0;
+        for (auto &inp : txn["vin"])
+            sum_input += inp["prevout"]["value"].asUInt64();
+        for (auto &out : txn["vout"])
+            sum_output += out["value"].asUInt64();
+        if (sum_input < sum_output) {
+            // Invalid Txn
+            continue;
+        }
+
+        string ser_txn = serialize_txn(txn);
+
+        transactions.push_back({(sum_input - sum_output)/ser_txn.size(), txn});
     }
 
-    set<string> s;
+    sort(transactions.begin(), transactions.end(), greater<pair<uint64_t, Json::Value>>());
+
+    vector<string> blockTxns;
+    vector<string> blockTxnIds;
+    int64_t reward = 625000000;
+    uint32_t block_size = 80;
     
     for (auto &txn : transactions) {
-        for (auto &inp : txn["vin"]) {
-            if (inp["prevout"]["scriptpubkey_type"] == "p2sh"){
-                vector<string> ops = getOps(inp["inner_redeemscript_asm"].asString());
-                if (identifyScriptType(ops) == "Invalid")
-                    cout << inp["inner_redeemscript_asm"].asString() << '\n' << endl;
-                s.insert(identifyScriptType(ops));
+        bool flag = false;
+        for (auto &inp : txn.second["vin"]) {
+            if (inp["prevout"]["scriptpubkey_type"] != "p2pkh" && inp["prevout"]["scriptpubkey_type"] != "v0_p2wpkh"){
+                flag = true;
+                break;
             }
+        }
+        if (flag) continue;
+
+        string ser_txn = serialize_txn(txn.second);
+        
+        if (block_size + ser_txn.size() < 1024*1024 && verify_txn(txn.second) >= 0) {
+            blockTxns.push_back(ser_txn);
+            block_size += ser_txn.size();
+            reward += txn.first;
         }
     }
 
-    for (auto &i : s) {
-        cout << i << endl;
+    // Calculate TXIDs of all the transactions to be included in the block
+    for (string txn : blockTxns) {
+        char sha[SHA256_DIGEST_LENGTH];
+        SHA256((unsigned char*) txn.c_str(), txn.length(), (unsigned char*) sha);
+        SHA256((unsigned char*) sha, SHA256_DIGEST_LENGTH, (unsigned char*) sha);
+        string txid = "";
+        // for (int i = SHA256_DIGEST_LENGTH-1; i >= 0; i--)
+        //     txid.push_back(sha[i]);
+        for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+            txid.push_back(sha[i]);
+        blockTxnIds.push_back(txid);
     }
+    
+    string block = "";
+    string blockHeader = genBlockHeader(blockTxnIds);
+    block += blockHeader;
+    string nonce = calcNonce(blockHeader);
+    block += nonce;
+    block = bstr2hexstr(block, block.length());
+    block.push_back('\n');
+
+    string coinbaseTxn = genCoinbaseTxn(reward);
+    block += bstr2hexstr(coinbaseTxn, coinbaseTxn.length());
+    block.push_back('\n');
+
+    string coinbaseTxnId = "";
+    char sha[SHA256_DIGEST_LENGTH];
+    SHA256((unsigned char*) coinbaseTxn.c_str(), coinbaseTxn.length(), (unsigned char*) sha);
+    SHA256((unsigned char*) sha, SHA256_DIGEST_LENGTH, (unsigned char*) sha);
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+        coinbaseTxnId.push_back(sha[i]);
+    
+    reverse(coinbaseTxnId.begin(), coinbaseTxnId.end());
+    
+    block += bstr2hexstr(coinbaseTxnId, coinbaseTxnId.length());
+    block.push_back('\n');
+
+    for (string txid : blockTxnIds) {
+        reverse(txid.begin(), txid.end());
+        block += bstr2hexstr(txid, txid.length());
+        block.push_back('\n');
+    }
+
+    ofstream block_file("output.txt");
+    block_file << block;
+    block_file.close();
+
+    cout << "Block mined successfully!" << endl;
+    cout << "Nonce = " << bstr2hexstr(nonce, nonce.length()) << endl;
+    cout << "Reward = " << reward << endl;
+    cout << "Block size = " << double(block_size)/1024/1024 << " MB" << endl;
 }
 
 
 int main() {
+    mine();
     // vector<Json::Value> transactions;       // Vector to store all transactions
 
     // // Iterate through all files in the mempool directory and read the transactions
@@ -126,7 +203,7 @@ int main() {
         
     //     bool flag = false;
     //     for (auto &inp : txn["vin"]) {
-    //         if (inp["prevout"]["scriptpubkey_type"] != "p2pkh"){
+    //         if (inp["prevout"]["scriptpubkey_type"] != "p2pkh" && inp["prevout"]["scriptpubkey_type"] != "v0_p2wpkh"){
     //             flag = true;
     //             break;
     //         }
@@ -152,36 +229,36 @@ int main() {
 
 
 
-    // ifstream txn_file("mempool/ff907975dc0cfa299e908e5fba6df56c764866d9a9c22828824c28b8e4511320.json");         // p2pkh
-    // ifstream txn_file("mempool/598ed237ba816ab2c80ba7b57cd48c3ad87a15bf33736061eb0304ee23412d85.json");
-    // ifstream txn_file("mempool/fff53b0fda0ab690ddaa23c84536e0d364a736bb93137a76ebf5d78f57cdd32f.json");         // p2wpkh
+    // // ifstream txn_file("mempool/ff907975dc0cfa299e908e5fba6df56c764866d9a9c22828824c28b8e4511320.json");         // p2pkh
+    // // ifstream txn_file("mempool/fff53b0fda0ab690ddaa23c84536e0d364a736bb93137a76ebf5d78f57cdd32f.json");         // p2wpkh
     // ifstream txn_file("mempool/ff7f94f1344696386e4e75e33114fd158055104793eb151e73f0b032a073b35e.json");         // p2wsh
-    ifstream txn_file("mempool/598ed237ba816ab2c80ba7b57cd48c3ad87a15bf33736061eb0304ee23412d85.json");         // p2sh-p2wpkh
+    // // ifstream txn_file("mempool/598ed237ba816ab2c80ba7b57cd48c3ad87a15bf33736061eb0304ee23412d85.json");         // p2sh-p2wpkh
+    // // ifstream txn_file("mempool/598ed237ba816ab2c80ba7b57cd48c3ad87a15bf33736061eb0304ee23412d85.json");
     
 
-    std::ostringstream tmp;
-    tmp << txn_file.rdbuf();
-    std::string txn_str = tmp.str();
+    // std::ostringstream tmp;
+    // tmp << txn_file.rdbuf();
+    // std::string txn_str = tmp.str();
 
-    Json::Value txn;
-    Json::Reader reader;
-    reader.parse(txn_str.c_str(), txn);
+    // Json::Value txn;
+    // Json::Reader reader;
+    // reader.parse(txn_str.c_str(), txn);
     
-    // string ser_txn = serialize_txn(txn, true);
-    // string ser_txn_hex = bstr2hexstr(ser_txn, ser_txn.length());
-    // cout << ser_txn_hex << '\n' << endl;
+    // // string ser_txn = serialize_txn(txn, true);
+    // // string ser_txn_hex = bstr2hexstr(ser_txn, ser_txn.length());
+    // // cout << ser_txn_hex << '\n' << endl;
     
-    // char sha[SHA256_DIGEST_LENGTH];
-    // SHA256((unsigned char*) ser_txn.c_str(), ser_txn.length(), (unsigned char*) sha);
-    // SHA256((unsigned char*) sha, SHA256_DIGEST_LENGTH, (unsigned char*) sha);
-    // for (int i = 0; i < SHA256_DIGEST_LENGTH/2; i++)
-    //     swap(sha[i], sha[SHA256_DIGEST_LENGTH - i - 1]);
+    // // char sha[SHA256_DIGEST_LENGTH];
+    // // SHA256((unsigned char*) ser_txn.c_str(), ser_txn.length(), (unsigned char*) sha);
+    // // SHA256((unsigned char*) sha, SHA256_DIGEST_LENGTH, (unsigned char*) sha);
+    // // for (int i = 0; i < SHA256_DIGEST_LENGTH/2; i++)
+    // //     swap(sha[i], sha[SHA256_DIGEST_LENGTH - i - 1]);
     
-    // SHA256((unsigned char*) sha, SHA256_DIGEST_LENGTH, (unsigned char*) sha);
-    // cout << "Triple SHA256: " << bstr2hexstr(sha, SHA256_DIGEST_LENGTH) << endl;
+    // // SHA256((unsigned char*) sha, SHA256_DIGEST_LENGTH, (unsigned char*) sha);
+    // // cout << "Triple SHA256: " << bstr2hexstr(sha, SHA256_DIGEST_LENGTH) << endl;
 
-    cout << txn << endl;
-    cout << verify_txn(txn) << endl;
+    // cout << txn << endl;
+    // cout << verify_txn(txn) << endl;
 
 
     return 0;

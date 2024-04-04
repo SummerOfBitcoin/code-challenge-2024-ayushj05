@@ -53,7 +53,7 @@ bool verify_sig (string pubKey, std::string signature) {
     for (int i = 0; i < 3; i++)
         serialized_txn.push_back(0);
     
-    cout << "Serialized txn: " << bstr2hexstr(serialized_txn, serialized_txn.length()) << endl;
+    // cout << "Serialized txn: " << bstr2hexstr(serialized_txn, serialized_txn.length()) << endl;
 
     signature.pop_back();
     signature.pop_back();
