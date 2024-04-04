@@ -12,8 +12,10 @@ extern string target;
 
 string getMerkleRoot(vector<string> &txns_included) {
     queue<string> hashQ;
-    for (auto &txn : txns_included)
+    for (auto &txn : txns_included) {
+        reverse(txn.begin(), txn.end());
         hashQ.push(txn);
+    }
 
     uint32_t prev_size = hashQ.size();
 
