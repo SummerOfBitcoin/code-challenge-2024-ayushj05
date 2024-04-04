@@ -442,21 +442,21 @@ int verify_txn(Json::Value &txn) {
             valid = p2pkh_verify(scriptPubKeyOps, scriptSigOps, txn);
         }
         else if (scriptPubKeyType == "p2sh") {
-            serialized_txn = serialize_segwit_1(txn) + serialize_segwit_inp(inp) + serialize_segwit_2(txn);
+            serialized_txn = serialize_segwit_1(txn) + serialize_segwit_inp(inp, "p2sh") + serialize_segwit_2(txn);
             std::vector<std::string> scriptSigOps = getOps(inp["scriptsig_asm"].asString());
             std::vector<std::string> redeemScriptOps = getOps(inp["inner_redeemscript_asm"].asString());
             valid = p2sh_verify(scriptPubKeyOps, scriptSigOps, redeemScriptOps, txn, inp);
         }
         // DONE
         else if (scriptPubKeyType == "v0_p2wpkh") {
-            serialized_txn = serialize_segwit_1(txn) + serialize_segwit_inp(inp) + serialize_segwit_2(txn);
+            serialized_txn = serialize_segwit_1(txn) + serialize_segwit_inp(inp, "p2wpkh") + serialize_segwit_2(txn);
             std::vector<std::string> witness;
             for (auto &wtns : inp["witness"])
                 witness.push_back(wtns.asString());
             valid = p2wpkh_verify(scriptPubKeyOps, witness, txn);
         }
         else if (scriptPubKeyType == "v0_p2wsh") {
-            serialized_txn = serialize_segwit_1(txn) + serialize_segwit_inp(inp) + serialize_segwit_2(txn);
+            serialized_txn = serialize_segwit_1(txn) + serialize_segwit_inp(inp, "p2wsh") + serialize_segwit_2(txn);
             std::vector<std::string> witness;
             for (auto &wtns : inp["witness"])
                 witness.push_back(wtns.asString());

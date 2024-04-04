@@ -12,6 +12,9 @@ using namespace std;
 #define IS_UINT32_T 0
 #define IS_INT64_T 1
 
+extern string identifyScriptType(std::vector<std::string> &ops);
+extern std::vector<std::string> getOps(std::string asmScript);
+
 typedef basic_string<unsigned char> ustring;
 
 uint8_t hex2int(char ch)
@@ -184,7 +187,7 @@ string serialize_segwit_1 (Json::Value txn) {
 }
 
 
-string serialize_segwit_inp (Json::Value inp) {
+string serialize_segwit_inp (Json::Value inp, string scriptType) {
     string ser_inp = "";
     
     ser_inp = hexstr2bstr(inp["txid"].asString());
@@ -193,7 +196,13 @@ string serialize_segwit_inp (Json::Value inp) {
 
     // Need to find the PKH from prevout's scriptpubkey
     string scriptcode = "1976a914";
-    scriptcode += inp["prevout"]["scriptpubkey"].asString().substr(4);
+    if (scriptType == "p2sh") {
+        vector<string> ops = getOps(inp["inner_redeemscript_asm"].asString());
+        if (identifyScriptType(ops) == "p2wpkh")
+            scriptcode += ops[2];
+    }
+    else if (scriptType == "p2wpkh")
+        scriptcode += inp["prevout"]["scriptpubkey"].asString().substr(4);
     scriptcode += "88ac";
     ser_inp += hexstr2bstr(scriptcode);
 
