@@ -78,11 +78,12 @@ void mine() {
     block += blockHeader;
     string nonce = calcNonce(blockHeader);
     block += nonce;
-    block = bstr2hexstr(block, block.length());
+    // block = bstr2hexstr(block, block.length());
     block.push_back('\n');
 
     string coinbaseTxn = genCoinbaseTxn(reward);
-    block += bstr2hexstr(coinbaseTxn, coinbaseTxn.length());
+    block += coinbaseTxn;
+    // block += bstr2hexstr(coinbaseTxn, coinbaseTxn.length());
     block.push_back('\n');
 
     string coinbaseTxnId = "";
@@ -94,12 +95,14 @@ void mine() {
     
     reverse(coinbaseTxnId.begin(), coinbaseTxnId.end());
     
-    block += bstr2hexstr(coinbaseTxnId, coinbaseTxnId.length());
+    block += coinbaseTxnId;
+    // block += bstr2hexstr(coinbaseTxnId, coinbaseTxnId.length());
     block.push_back('\n');
 
     for (string txid : blockTxnIds) {
         reverse(txid.begin(), txid.end());
-        block += bstr2hexstr(txid, txid.length());
+        block += txid;
+        // block += bstr2hexstr(txid, txid.length());
         block.push_back('\n');
     }
 
