@@ -79,7 +79,8 @@ string genBlockHeader (vector<string> &txns_included) {
     time_t timestamp = time(nullptr);
     block_header += int2bin(timestamp);
 
-    block_header += string{(int8_t) 31, (int8_t) 0, (int8_t) 255, (int8_t) 255}; // Bits
+    block_header += string{(int8_t) 255, (int8_t) 255, (int8_t) 0, (int8_t) 31}; // Bits
+    // block_header += string{(int8_t) 31, (int8_t) 0, (int8_t) 255, (int8_t) 255}; // Bits
 
     return block_header;
 }
