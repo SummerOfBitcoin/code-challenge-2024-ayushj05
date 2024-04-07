@@ -116,6 +116,7 @@ void mine() {
 
 int main() {
     mine();
+
     // vector<Json::Value> transactions;       // Vector to store all transactions
 
     // // Iterate through all files in the mempool directory and read the transactions

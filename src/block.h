@@ -15,7 +15,7 @@ string getMerkleRoot(vector<string> &txns_included) {
     for (auto &txn : txns_included)
         hashQ.push(txn);
 
-    uint32_t prev_size = hashQ.size();
+    uint32_t prev_size = 2*hashQ.size();
 
     while (hashQ.size() > 1) {
         if (hashQ.size() == prev_size/2 && hashQ.size() % 2 == 1) {
@@ -39,10 +39,7 @@ string getMerkleRoot(vector<string> &txns_included) {
         hashQ.push(combined);
     }
 
-    string merkle_root = hashQ.front();
-    reverse(merkle_root.begin(), merkle_root.end());
-
-    return merkle_root;
+    return hashQ.front();
 }
 
 string genCoinbaseTxn (int64_t reward) {
@@ -73,7 +70,9 @@ string genBlockHeader (vector<string> &txns_included) {
     for (int i = 0; i < 32; i++)
         block_header.push_back(0); // Previous block hash
     
-    block_header += getMerkleRoot(txns_included);
+    string merkle_root = getMerkleRoot(txns_included);
+    reverse(merkle_root.begin(), merkle_root.end());
+    block_header += merkle_root;
 
     time_t timestamp = time(nullptr);
     block_header += int2bin(timestamp);
