@@ -45,7 +45,7 @@ string getMerkleRoot(vector<string> &txns_included) {
     return hashQ.front();
 }
 
-string genCoinbaseTxn (int64_t reward) {
+string genCoinbaseTxn (int64_t reward, string wTXID_commitment) {
     string coinbase_txn = "";
 
     coinbase_txn += int2bin(1); // Version
@@ -56,11 +56,17 @@ string genCoinbaseTxn (int64_t reward) {
     coinbase_txn += string{(int8_t) 0x04, (int8_t) 0x03, (int8_t) 0x95, (int8_t) 0x1a, (int8_t) 0x06}; // scriptSig
     coinbase_txn += int2bin(0xffffffff); // Sequence
     
-    coinbase_txn += int2compact(1); // Number of outputs
+    coinbase_txn += int2compact(2); // Number of outputs
     
     coinbase_txn += int2bin(reward, IS_INT64_T); // Reward
     coinbase_txn += int2compact(0x19); // Output script length
     coinbase_txn += hexstr2bstr("76a9142c30a6aaac6d96687291475d7d52f4b469f665a688ac"); // Output script
+
+    coinbase_txn += int2bin(0, IS_INT64_T); // Reward
+    coinbase_txn += int2compact(0x26); // Output script length
+    coinbase_txn += hexstr2bstr("6a24aa21a9ed");    // Output script
+    coinbase_txn += wTXID_commitment;               // Output script
+    coinbase_txn += hexstr2bstr("01200000000000000000000000000000000000000000000000000000000000000000");
     
     coinbase_txn += int2bin(0); // Locktime
 
@@ -73,14 +79,12 @@ string genBlockHeader (vector<string> &txns_included) {
     block_header += string(32, (int8_t) 0); // Previous block hash
     
     string merkle_root = getMerkleRoot(txns_included);
-    // reverse(merkle_root.begin(), merkle_root.end());
     block_header += merkle_root;
 
     time_t timestamp = time(nullptr);
     block_header += int2bin(timestamp);
 
     block_header += string{(int8_t) 255, (int8_t) 255, (int8_t) 0, (int8_t) 31}; // Bits
-    // block_header += string{(int8_t) 31, (int8_t) 0, (int8_t) 255, (int8_t) 255}; // Bits
 
     return block_header;
 }

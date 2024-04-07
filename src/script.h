@@ -21,6 +21,17 @@ extern set<string> inputs_used;
 string serialized_txn = "", serialized_segwit_1 = "", serialized_segwit_inp = "", serialized_segwit_2 = "";
 
 
+string hash256(string data) {
+    string hash = "";
+    char sha[SHA256_DIGEST_LENGTH];
+    SHA256((unsigned char*) data.c_str(), data.length(), (unsigned char*) sha);
+    SHA256((unsigned char*) sha, SHA256_DIGEST_LENGTH, (unsigned char*) sha);
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+        hash.push_back(sha[i]);
+    return hash;
+}
+
+
 std::vector<std::string> getOps(std::string asmScript) {
     std::vector<std::string> ops;
 

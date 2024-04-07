@@ -74,7 +74,10 @@ void mine() {
         blockTxnIds.push_back(txid);
     }
 
-    string coinbaseTxn = genCoinbaseTxn(reward);
+    vector<string> wTXIDs = blockTxnIds;
+    wTXIDs.push_back(string(32, 0));
+    string wTXID_commitment = hash256(getMerkleRoot(wTXIDs) + string(32, 0));
+    string coinbaseTxn = genCoinbaseTxn(reward, wTXID_commitment);
     block_size += coinbaseTxn.size();
 
     string coinbaseTxnId = "";
@@ -93,7 +96,6 @@ void mine() {
     block = bstr2hexstr(block, block.length());
     block.push_back('\n');
 
-    cout << bstr2hexstr(coinbaseTxn, coinbaseTxn.length()) << endl;
     block += bstr2hexstr(coinbaseTxn, coinbaseTxn.length());
     block.push_back('\n');
 
