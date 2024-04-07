@@ -16,13 +16,15 @@ string getMerkleRoot(vector<string> &txns_included) {
     for (int i = txns_included.size() - 1; i >= 0; i--)
         hashQ.push(txns_included[i]);
 
-    uint32_t prev_size = 2*hashQ.size();
+    uint32_t prev_size = hashQ.size();
+    bool start = true;
 
     while (hashQ.size() > 1) {
-        if (hashQ.size() == prev_size/2 && hashQ.size() % 2 == 1) {
+        if ((start || hashQ.size() == prev_size/2) && hashQ.size() % 2 == 1) {
             hashQ.push(hashQ.back());
             prev_size = hashQ.size();
         }
+        start = false;
         
         string first = hashQ.front();
         hashQ.pop();

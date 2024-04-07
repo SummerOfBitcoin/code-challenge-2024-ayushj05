@@ -60,17 +60,19 @@ void mine() {
         }
     }
 
+    int num = 0;
     // Calculate TXIDs of all the transactions to be included in the block
     for (string txn : blockTxns) {
+        if (num == 5)
+            break;
         char sha[SHA256_DIGEST_LENGTH];
         SHA256((unsigned char*) txn.c_str(), txn.length(), (unsigned char*) sha);
         SHA256((unsigned char*) sha, SHA256_DIGEST_LENGTH, (unsigned char*) sha);
         string txid = "";
-        // for (int i = SHA256_DIGEST_LENGTH-1; i >= 0; i--)
-        //     txid.push_back(sha[i]);
         for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
             txid.push_back(sha[i]);
         blockTxnIds.push_back(txid);
+        num++;
     }
 
     string coinbaseTxn = genCoinbaseTxn(reward);
