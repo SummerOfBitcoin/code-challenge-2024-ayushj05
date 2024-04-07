@@ -60,7 +60,7 @@ void mine() {
             reward += txn.first;
         }
 
-        if (++count == 100) break;
+        if (++count == 4) break;
     }
 
     // Calculate TXIDs of all the transactions to be included in the block
