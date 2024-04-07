@@ -66,7 +66,7 @@ string genCoinbaseTxn (int64_t reward, string wTXID_commitment) {
     coinbase_txn += int2compact(0x26); // Output script length
     coinbase_txn += hexstr2bstr("6a24aa21a9ed");    // Output script
     coinbase_txn += wTXID_commitment;               // Output script
-    coinbase_txn += hexstr2bstr("01200000000000000000000000000000000000000000000000000000000000000000");
+    // coinbase_txn += hexstr2bstr("01200000000000000000000000000000000000000000000000000000000000000000");
     
     coinbase_txn += int2bin(0); // Locktime
 
