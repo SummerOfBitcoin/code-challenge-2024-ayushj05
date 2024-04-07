@@ -72,6 +72,17 @@ void mine() {
             txid.push_back(sha[i]);
         blockTxnIds.push_back(txid);
     }
+
+    string coinbaseTxn = genCoinbaseTxn(reward);
+    block_size += coinbaseTxn.size();
+
+    string coinbaseTxnId = "";
+    char sha[SHA256_DIGEST_LENGTH];
+    SHA256((unsigned char*) coinbaseTxn.c_str(), coinbaseTxn.length(), (unsigned char*) sha);
+    SHA256((unsigned char*) sha, SHA256_DIGEST_LENGTH, (unsigned char*) sha);
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+        coinbaseTxnId.push_back(sha[i]);
+    blockTxnIds.push_back(coinbaseTxnId);
     
     string block = "";
     string blockHeader = genBlockHeader(blockTxnIds);
@@ -81,25 +92,13 @@ void mine() {
     block = bstr2hexstr(block, block.length());
     block.push_back('\n');
 
-    string coinbaseTxn = genCoinbaseTxn(reward);
     block += bstr2hexstr(coinbaseTxn, coinbaseTxn.length());
     block.push_back('\n');
 
-    string coinbaseTxnId = "";
-    char sha[SHA256_DIGEST_LENGTH];
-    SHA256((unsigned char*) coinbaseTxn.c_str(), coinbaseTxn.length(), (unsigned char*) sha);
-    SHA256((unsigned char*) sha, SHA256_DIGEST_LENGTH, (unsigned char*) sha);
-    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-        coinbaseTxnId.push_back(sha[i]);
-    
-    reverse(coinbaseTxnId.begin(), coinbaseTxnId.end());
-    
-    block += bstr2hexstr(coinbaseTxnId, coinbaseTxnId.length());
-    block.push_back('\n');
-
-    for (string txid : blockTxnIds) {
-        reverse(txid.begin(), txid.end());
-        block += bstr2hexstr(txid, txid.length());
+    // Add all the transactions to the block in reverse order because coinbase txn is at the end
+    for (int i = blockTxnIds.size() - 1; i >= 0; i--) {
+        reverse(blockTxnIds[i].begin(), blockTxnIds[i].end());
+        block += bstr2hexstr(blockTxnIds[i], blockTxnIds[i].length());
         block.push_back('\n');
     }
 

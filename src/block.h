@@ -12,8 +12,9 @@ extern string target;
 
 string getMerkleRoot(vector<string> &txns_included) {
     queue<string> hashQ;
-    for (auto &txn : txns_included)
-        hashQ.push(txn);
+    // Push all txids into the queue in reverse order because coinbase txn is at the end
+    for (int i = txns_included.size() - 1; i >= 0; i--)
+        hashQ.push(txns_included[i]);
 
     uint32_t prev_size = 2*hashQ.size();
 
