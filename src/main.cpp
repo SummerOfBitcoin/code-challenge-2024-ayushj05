@@ -41,6 +41,7 @@ void mine() {
     int64_t reward = 625000000;
     uint32_t block_size = 80;
 
+    int count = 0;
     for (auto &txn : transactions) {
         bool flag = false;
         for (auto &inp : txn.second["vin"]) {
@@ -58,6 +59,8 @@ void mine() {
             block_size += ser_txn.size();
             reward += txn.first;
         }
+
+        if (++count == 2) break;
     }
 
     // Calculate TXIDs of all the transactions to be included in the block
