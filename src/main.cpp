@@ -44,7 +44,7 @@ void mine() {
     for (auto &txn : transactions) {
         bool flag = false;
         for (auto &inp : txn.second["vin"]) {
-            if (inp["prevout"]["scriptpubkey_type"] != "p2pkh"){
+            if (inp["prevout"]["scriptpubkey_type"] != "p2pkh" && inp["prevout"]["scriptpubkey_type"] != "v1_p2tr"){
                 flag = true;
                 break;
             }
