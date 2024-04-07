@@ -20,8 +20,9 @@ string getMerkleRoot(vector<string> &txns_included) {
     bool start = true;
 
     while (hashQ.size() > 1) {
-        if ((start || hashQ.size() == prev_size/2) && hashQ.size() % 2 == 1) {
-            hashQ.push(hashQ.back());
+        if (start || hashQ.size() == prev_size/2) {
+            if (hashQ.size() % 2 == 1)
+                hashQ.push(hashQ.back());
             prev_size = hashQ.size();
         }
         start = false;
@@ -105,10 +106,8 @@ string calcNonce (string blockHeader) {
         for (int i = SHA256_DIGEST_LENGTH - 1; i >= 0; i--)
             hash.push_back(sha[i]);
 
-        if (hash < target) {
-            cout << "Hash = " << bstr2hexstr(hash, hash.length()) << endl;
+        if (hash < target)
             return nonce;
-        }
         
         // Increment nonce
         int j = 3;
