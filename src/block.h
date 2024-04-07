@@ -51,7 +51,7 @@ string genCoinbaseTxn (int64_t reward) {
     coinbase_txn += int2bin(1); // Version
     coinbase_txn += int2compact(1); // Number of inputs
     
-    coinbase_txn += int2bin(0); // Previous txid
+    coinbase_txn += string(32, (int8_t) 0); // Previous txid
     coinbase_txn += int2bin(0xffffffff); // Previous index (vout)
     coinbase_txn += string{(int8_t) 0x04, (int8_t) 0x03, (int8_t) 0x95, (int8_t) 0x1a, (int8_t) 0x06}; // scriptSig
     coinbase_txn += int2bin(0xffffffff); // Sequence
@@ -70,8 +70,7 @@ string genCoinbaseTxn (int64_t reward) {
 string genBlockHeader (vector<string> &txns_included) {
     string block_header = "";
     block_header += int2bin(32); // Version
-    for (int i = 0; i < 32; i++)
-        block_header.push_back(0); // Previous block hash
+    block_header += string(32, (int8_t) 0); // Previous block hash
     
     string merkle_root = getMerkleRoot(txns_included);
     reverse(merkle_root.begin(), merkle_root.end());
