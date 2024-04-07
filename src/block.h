@@ -73,7 +73,7 @@ string genBlockHeader (vector<string> &txns_included) {
     block_header += string(32, (int8_t) 0); // Previous block hash
     
     string merkle_root = getMerkleRoot(txns_included);
-    reverse(merkle_root.begin(), merkle_root.end());
+    // reverse(merkle_root.begin(), merkle_root.end());
     block_header += merkle_root;
 
     time_t timestamp = time(nullptr);
