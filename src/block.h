@@ -49,6 +49,7 @@ string genCoinbaseTxn (int64_t reward, string wTXID_commitment) {
     string coinbase_txn = "";
 
     coinbase_txn += int2bin(1); // Version
+    coinbase_txn += string{(int8_t) 0x00, (int8_t) 0x01}; // Marker, Flag
     coinbase_txn += int2compact(1); // Number of inputs
     
     coinbase_txn += string(32, (int8_t) 0); // Previous txid
@@ -66,7 +67,7 @@ string genCoinbaseTxn (int64_t reward, string wTXID_commitment) {
     coinbase_txn += int2compact(0x26); // Output script length
     coinbase_txn += hexstr2bstr("6a24aa21a9ed");    // Output script
     coinbase_txn += wTXID_commitment;               // Output script
-    // coinbase_txn += hexstr2bstr("01200000000000000000000000000000000000000000000000000000000000000000");
+    coinbase_txn += hexstr2bstr("01200000000000000000000000000000000000000000000000000000000000000000");
     
     coinbase_txn += int2bin(0); // Locktime
 
