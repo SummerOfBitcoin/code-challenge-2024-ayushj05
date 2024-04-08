@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <algorithm>
 #include <cmath>
 #include <jsoncpp/json/json.h>
@@ -116,6 +117,50 @@ string int2compact (uint64_t num) {
     }
 
     return comp;
+}
+
+string get_wTXID (Json::Value txn) {
+    string ser_txn = "";
+
+    ser_txn += int2bin(txn["version"].asUInt());
+    ser_txn += int2compact(txn["vin"].size());
+    
+    for (auto &inp : txn["vin"]) {
+        // outpoint
+        string txid = hexstr2bstr(inp["txid"].asString());
+        reverse(txid.begin(), txid.end());
+        ser_txn += txid;
+        ser_txn += int2bin(inp["vout"].asUInt());
+
+        ser_txn += int2compact(inp["scriptsig"].asString().length()/2);
+        ser_txn += hexstr2bstr(inp["scriptsig"].asString());
+
+        ser_txn += int2bin(inp["sequence"].asUInt());
+    }
+
+    ser_txn += int2compact(txn["vout"].size());
+
+    for (auto &out : txn["vout"]) {
+        ser_txn += int2bin(out["value"].asInt64(), IS_INT64_T);
+        ser_txn += int2compact(out["scriptpubkey"].asString().length()/2);
+        ser_txn += hexstr2bstr(out["scriptpubkey"].asString());
+    }
+
+    for (auto &inp : txn["vin"]) {
+        // string_view k = "witness";
+        // if (inp.find(k.begin(), k.end()) == k.end())
+        //     continue;
+        if (inp["witness"].empty())
+            continue;
+        
+        ser_txn += int2compact(inp["witness"].size());
+        for (auto &wit : inp["witness"])
+            ser_txn += int2compact(wit.asString().length()/2) + hexstr2bstr(wit.asString());
+    }
+
+    ser_txn += int2bin(txn["locktime"].asUInt());
+
+    return ser_txn;
 }
 
 string serialize_txn (Json::Value txn, bool isCleared = false) {
