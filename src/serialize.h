@@ -147,10 +147,7 @@ string get_wTXID (Json::Value txn) {
     }
 
     for (auto &inp : txn["vin"]) {
-        // string_view k = "witness";
-        // if (inp.find(k.begin(), k.end()) == k.end())
-        //     continue;
-        if (inp["witness"].empty())
+        if (!inp.isMember("witness"))
             continue;
         
         ser_txn += int2compact(inp["witness"].size());

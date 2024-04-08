@@ -38,6 +38,7 @@ void mine() {
 
     vector<string> blockTxns;
     vector<string> blockTxnIds;
+    vector<string> wTXIDs;
     int64_t reward = 625000000;
     uint32_t block_size = 80;
 
@@ -55,23 +56,17 @@ void mine() {
         
         if (block_size + ser_txn.size() < 1024*1024 && verify_txn(txn.second) >= 0) {
             blockTxns.push_back(ser_txn);
+            wTXIDs.push_back(hash256(get_wTXID(txn.second)));
             block_size += ser_txn.size();
             reward += txn.first;
         }
     }
 
     // Calculate TXIDs of all the transactions to be included in the block
-    for (string txn : blockTxns) {
-        char sha[SHA256_DIGEST_LENGTH];
-        SHA256((unsigned char*) txn.c_str(), txn.length(), (unsigned char*) sha);
-        SHA256((unsigned char*) sha, SHA256_DIGEST_LENGTH, (unsigned char*) sha);
-        string txid = "";
-        for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-            txid.push_back(sha[i]);
-        blockTxnIds.push_back(txid);
-    }
+    for (string txn : blockTxns)
+        blockTxnIds.push_back(hash256(txn));
 
-    vector<string> wTXIDs = blockTxnIds;
+    
     wTXIDs.push_back(string(32, 0));
     string wTXID_commitment = hash256(getMerkleRoot(wTXIDs) + string(32, 0));
     string coinbaseTxn = genCoinbaseTxn(reward, wTXID_commitment);
