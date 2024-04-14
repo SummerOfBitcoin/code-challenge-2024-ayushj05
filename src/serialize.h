@@ -119,47 +119,6 @@ string int2compact (uint64_t num) {
     return comp;
 }
 
-string get_wTXID (Json::Value txn) {
-    string ser_txn = "";
-
-    ser_txn += int2bin(txn["version"].asUInt());
-    ser_txn += int2compact(txn["vin"].size());
-    
-    for (auto &inp : txn["vin"]) {
-        // outpoint
-        string txid = hexstr2bstr(inp["txid"].asString());
-        reverse(txid.begin(), txid.end());
-        ser_txn += txid;
-        ser_txn += int2bin(inp["vout"].asUInt());
-
-        ser_txn += int2compact(inp["scriptsig"].asString().length()/2);
-        ser_txn += hexstr2bstr(inp["scriptsig"].asString());
-
-        ser_txn += int2bin(inp["sequence"].asUInt());
-    }
-
-    ser_txn += int2compact(txn["vout"].size());
-
-    for (auto &out : txn["vout"]) {
-        ser_txn += int2bin(out["value"].asInt64(), IS_INT64_T);
-        ser_txn += int2compact(out["scriptpubkey"].asString().length()/2);
-        ser_txn += hexstr2bstr(out["scriptpubkey"].asString());
-    }
-
-    for (auto &inp : txn["vin"]) {
-        if (!inp.isMember("witness"))
-            continue;
-        
-        ser_txn += int2compact(inp["witness"].size());
-        for (auto &wit : inp["witness"])
-            ser_txn += int2compact(wit.asString().length()/2) + hexstr2bstr(wit.asString());
-    }
-
-    ser_txn += int2bin(txn["locktime"].asUInt());
-
-    return ser_txn;
-}
-
 string serialize_txn (Json::Value txn, bool isCleared = false) {
     string ser_txn = "";
     
@@ -196,6 +155,63 @@ string serialize_txn (Json::Value txn, bool isCleared = false) {
 
     return ser_txn;
 }
+
+
+string ser_wit (Json::Value txn) {
+    bool no_witness = true;
+    for (auto &inp : txn["vin"]) {
+        if (inp.isMember("witness")) {
+            no_witness = false;
+            break;
+        }
+    }
+    if (no_witness)
+        return serialize_txn(txn);
+
+    string ser_txn = "";
+
+    ser_txn += int2bin(txn["version"].asUInt());
+    ser_txn += int2compact(0);      // Marker for segwit
+    ser_txn += int2compact(1);      // Flag for segwit
+    ser_txn += int2compact(txn["vin"].size());
+    
+    for (auto &inp : txn["vin"]) {
+        // outpoint
+        string txid = hexstr2bstr(inp["txid"].asString());
+        reverse(txid.begin(), txid.end());
+        ser_txn += txid;
+        ser_txn += int2bin(inp["vout"].asUInt());
+
+        ser_txn += int2compact(inp["scriptsig"].asString().length()/2);
+        ser_txn += hexstr2bstr(inp["scriptsig"].asString());
+
+        ser_txn += int2bin(inp["sequence"].asUInt());
+    }
+
+    ser_txn += int2compact(txn["vout"].size());
+
+    for (auto &out : txn["vout"]) {
+        ser_txn += int2bin(out["value"].asInt64(), IS_INT64_T);
+        ser_txn += int2compact(out["scriptpubkey"].asString().length()/2);
+        ser_txn += hexstr2bstr(out["scriptpubkey"].asString());
+    }
+
+    for (auto &inp : txn["vin"]) {
+        if (!inp.isMember("witness")) {
+            ser_txn += int2compact(0);
+            continue;
+        }
+        
+        ser_txn += int2compact(inp["witness"].size());
+        for (auto &wit : inp["witness"])
+            ser_txn += int2compact(wit.asString().length()/2) + hexstr2bstr(wit.asString());
+    }
+
+    ser_txn += int2bin(txn["locktime"].asUInt());
+
+    return ser_txn;
+}
+
 
 string serialize_segwit_1 (Json::Value txn) {
     string serialized = "";

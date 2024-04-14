@@ -58,7 +58,7 @@ void mine() {
         
         if (block_size + ser_txn.size() < 1024*1024 && verify_txn(txn.second) >= 0) {
             blockTxns.push_back(ser_txn);
-            wTXIDs.push_back(hash256(get_wTXID(txn.second)));
+            wTXIDs.push_back(hash256(ser_wit(txn.second)));
             block_size += ser_txn.size();
             reward += txn.first;
 
@@ -73,11 +73,6 @@ void mine() {
 
     
     wTXIDs.push_back(string(32, 0));
-    for (auto it = wTXIDs.rbegin(); it != wTXIDs.rend(); it++) {
-        reverse(it->begin(), it->end());
-        cout << bstr2hexstr(*it, (*it).length()) << endl;
-        reverse(it->begin(), it->end());
-    }
     string wTXID_commitment = hash256(getMerkleRoot(wTXIDs) + string(32, 0));
     string coinbaseTxn = genCoinbaseTxn(reward, wTXID_commitment);
     block_size += coinbaseTxn.size();
