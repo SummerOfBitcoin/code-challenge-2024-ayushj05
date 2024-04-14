@@ -41,8 +41,6 @@ void mine() {
     vector<string> wTXIDs;
     int64_t reward = 625000000;
     uint32_t block_size = 80;
-    
-    uint8_t max_txns = 5;
 
     for (auto &txn : transactions) {
         bool flag = false;
@@ -61,9 +59,6 @@ void mine() {
             wTXIDs.push_back(hash256(ser_wit(txn.second)));
             block_size += ser_txn.size();
             reward += txn.first;
-
-            if(--max_txns == 0)
-                break;
         }
     }
 
