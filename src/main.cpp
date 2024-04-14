@@ -41,6 +41,8 @@ void mine() {
     vector<string> wTXIDs;
     int64_t reward = 625000000;
     uint32_t block_size = 80;
+    
+    uint8_t max_txns = 5;
 
     for (auto &txn : transactions) {
         bool flag = false;
@@ -59,6 +61,9 @@ void mine() {
             wTXIDs.push_back(hash256(get_wTXID(txn.second)));
             block_size += ser_txn.size();
             reward += txn.first;
+
+            if(--max_txns == 0)
+                break;
         }
     }
 
@@ -68,6 +73,11 @@ void mine() {
 
     
     wTXIDs.push_back(string(32, 0));
+    for (auto it = wTXIDs.rbegin(); it != wTXIDs.rend(); it++) {
+        reverse(it->begin(), it->end());
+        cout << bstr2hexstr(*it, (*it).length()) << endl;
+        reverse(it->begin(), it->end());
+    }
     string wTXID_commitment = hash256(getMerkleRoot(wTXIDs) + string(32, 0));
     string coinbaseTxn = genCoinbaseTxn(reward, wTXID_commitment);
     block_size += coinbaseTxn.size();
