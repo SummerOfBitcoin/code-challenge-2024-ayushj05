@@ -102,4 +102,6 @@ This project gave me a great and detailed idea of how each type of transaction s
 ## Future Improvement
 This mining program only mines transactions that are of the type p2pkh, p2wpkh, and p2sh (excluding p2sh-p2ms and p2sh-p2wsh). So, one possible improvement on this assignment is implementing the verification of p2tr, p2wsh and p2ms (and hence, p2sh-p2ms and p2sh-p2wsh as well) transactions.
 
+Also, I haven't done any sanity checks in this assignment. This needs to be implemented if in case the transaction has contradictory fields (Example: `scriptpubkey_type` doesn't match with `scriptpubkey_asm`).
+
 Further, there could be some room for improvement by removing redundant transaction parsings and implementing some faster mining method.
