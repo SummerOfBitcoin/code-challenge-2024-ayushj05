@@ -105,3 +105,10 @@ This mining program only mines transactions that are of the type p2pkh, p2wpkh, 
 Also, I haven't done any sanity checks in this assignment. This needs to be implemented if in case the transaction has contradictory fields (Example: `scriptpubkey_type` doesn't match with `scriptpubkey_asm`).
 
 Further, there could be some room for improvement by removing redundant transaction parsings and implementing some faster mining method.
+
+## Resources
+
+* https://learnmeabitcoin.com/
+* https://github.com/bitcoin/bips
+* https://developer.bitcoin.org/reference/transactions.html
+* https://en.bitcoin.it/wiki/Script
