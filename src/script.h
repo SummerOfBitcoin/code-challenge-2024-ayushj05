@@ -100,6 +100,7 @@ bool verify_sig (string pubKey, std::string signature) {
     return false;
 }
 
+// Execute the operation in the script
 bool exec_op (string op, stack<string> &stk, Json::Value &txn, int &bytes_to_push) {
     if (op == "OP_0") {
         stk.push("0");
