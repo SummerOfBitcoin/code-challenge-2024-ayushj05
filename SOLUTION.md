@@ -97,7 +97,7 @@ These functions are some common functions and will be called a lot of times, thu
 # Conclusion
 
 ## Insights Gained
-This project gave me a great and detailed idea of how each type of transaction script is verified, as per the BIPs. Even though I couldn't complete the implementation of verification of all script types, I went through the corresponding BIPs, and also got to know the importance of various script types and why the were proposed.
+This project gave me a great and detailed idea of how each type of transaction script is verified, as per the BIPs. Even though I couldn't complete the implementation of verification of all script types, I went through the corresponding BIPs, and also got to know the importance of various script types and why they were proposed.
 
 ## Future Improvement
 This mining program only mines transactions that are of the type p2pkh, p2wpkh, and p2sh (excluding p2sh-p2ms and p2sh-p2wsh). So, one possible improvement on this assignment is implementing the verification of p2tr, p2wsh and p2ms (and hence, p2sh-p2ms and p2sh-p2wsh as well) transactions.
