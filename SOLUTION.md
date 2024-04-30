@@ -92,7 +92,7 @@ I got a score of 73/100 for this mining program.
 The program has been designed while taking care of minimizing string parsing, as much as possible. For example, especially in the `serialize.h` file, all the functions related to txn serialization and data type conversions have been optimized so that the task to be performed is done in just a single iteration of the string.
 
 Why is it important?\
-These functions are some common functions and will be called a lot of times, thus essentially amounting to executing these functions on the entire list of transactions (which is VERY BIG). Thus reducing the time complexity even from O(2N) to O(N) can give us some serious improvement in the runtime.
+These functions are some common functions and will be called a lot of times, thus essentially amounting to executing these functions on the entire list of transactions (which is VERY BIG). Thus, reducing the time complexity, even from O(2N) to O(N), can give us significant improvement in the runtime.
 
 # Conclusion
 
