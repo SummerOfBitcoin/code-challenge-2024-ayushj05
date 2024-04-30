@@ -16,8 +16,7 @@ using namespace std;
 extern string identifyScriptType(std::vector<std::string> &ops);
 extern std::vector<std::string> getOps(std::string asmScript);
 
-typedef basic_string<unsigned char> ustring;
-
+// Convert hex to integer
 uint8_t hex2int(char ch)
 {
     if (ch >= '0' && ch <= '9')
@@ -119,6 +118,7 @@ string int2compact (uint64_t num) {
     return comp;
 }
 
+// Serialize a transaction
 string serialize_txn (Json::Value txn, bool isCleared = false) {
     string ser_txn = "";
     
@@ -156,7 +156,7 @@ string serialize_txn (Json::Value txn, bool isCleared = false) {
     return ser_txn;
 }
 
-
+// Serialize a transaction with segwit for wTXID calculation
 string ser_wit (Json::Value txn) {
     bool no_witness = true;
     for (auto &inp : txn["vin"]) {
@@ -212,7 +212,8 @@ string ser_wit (Json::Value txn) {
     return ser_txn;
 }
 
-
+// Serialize a transaction with segwit for signature verification
+// The first reusable part of the transaction
 string serialize_segwit_1 (Json::Value txn) {
     string serialized = "";
     
@@ -244,7 +245,7 @@ string serialize_segwit_1 (Json::Value txn) {
     return serialized;
 }
 
-
+// The non-reusable part of the transaction
 string serialize_segwit_inp (Json::Value inp, string scriptType) {
     string ser_inp = "";
     
@@ -271,6 +272,7 @@ string serialize_segwit_inp (Json::Value inp, string scriptType) {
     return ser_inp;
 }
 
+// The second reusable part of the transaction
 string serialize_segwit_2 (Json::Value txn) {
     string serialized = "";
 

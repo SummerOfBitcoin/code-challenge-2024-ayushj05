@@ -10,6 +10,7 @@ using namespace std;
 
 extern string target;
 
+// Function to get the merkle root of the transactions in txns_included
 string getMerkleRoot(vector<string> &txns_included) {
     queue<string> hashQ;
     // Push all txids into the queue in reverse order because coinbase txn is at the end
@@ -46,6 +47,7 @@ string getMerkleRoot(vector<string> &txns_included) {
     return hashQ.front();
 }
 
+// Generate coinbase transaction from reward and wTXID commitment
 string genCoinbaseTxn (int64_t reward, string wTXID_commitment) {
     string coinbase_txn = "";
 
@@ -75,6 +77,7 @@ string genCoinbaseTxn (int64_t reward, string wTXID_commitment) {
     return coinbase_txn;
 }
 
+// Generate block header from txns_included
 string genBlockHeader (vector<string> &txns_included) {
     string block_header = "";
     block_header += int2bin(32); // Version
@@ -91,6 +94,7 @@ string genBlockHeader (vector<string> &txns_included) {
     return block_header;
 }
 
+// Calculate the nonce for the block
 string calcNonce (string blockHeader) {
     string nonce = "";
     for (int i = 0; i < 4; i++)
