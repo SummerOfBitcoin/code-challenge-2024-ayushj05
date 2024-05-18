@@ -87,7 +87,8 @@ verify_txn (Json::Value &txn) {
 
 # Results and Performance
 
-I got a score of 73/100 for this mining program.
+I got a score of **73/100** for this mining program.\
+The program takes approximately **5.26 seconds** to complete (Geometric Mean over 10 runs).
 
 The program has been designed while taking care of minimizing string parsing, as much as possible. For example, especially in the `serialize.h` file, all the functions related to txn serialization and data type conversions have been optimized so that the task to be performed is done in just a single iteration of the string.
 
